@@ -13,6 +13,12 @@ export default function Modules() {
                 <li className="wd-content-item">Learn what is Web Development</li>
               </ul>
             </li>
+            <li className="wd-lesson">
+              <span className="wd-title">SLIDES</span>
+              <ul className="wd-content">
+                <li className="wd-content-item">Intro to Web Dev</li>
+              </ul>
+            </li>
           </ul>
         </li>
         <li className="wd-module">
