@@ -25,11 +25,10 @@ export default function Labs() {
           <li>
             Source code:
             <ul>
-              {/* replace with your real URLs */}
               <li>
                 <a
                   id="wd-github"
-                  href="https://github.com/your-username/your-repo"
+                  href="https://github.com/V-O-I-D-E-D/kambaz-next-js"
                   target="_blank"
                   rel="noreferrer"
                 >
