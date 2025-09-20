@@ -91,6 +91,48 @@ export default function Assignments({ params }: { params: { cid: string } }) {
           </Link>
         </li>
       </ul>
+            <h3 id="wd-assignments-quizzes">
+        QUIZZES 10% of Total <button>+</button>
+      </h3>
+      <ul id="wd-quiz-list">
+        <li className="wd-assignment-list-item">
+          <Link href={`/Courses/${cid}/Assignments/quiz-1`} className="wd-assignment-link">
+            Q1
+          </Link>
+        </li>
+        <li className="wd-assignment-list-item">
+          <Link href={`/Courses/${cid}/Assignments/quiz-2`} className="wd-assignment-link">
+            Q2
+          </Link>
+        </li>
+      </ul>
+
+      <h3 id="wd-assignments-exams">
+        EXAMS 30% of Total <button>+</button>
+      </h3>
+      <ul id="wd-exam-list">
+        <li className="wd-assignment-list-item">
+          <Link href={`/Courses/${cid}/Assignments/midterm`} className="wd-assignment-link">
+            Midterm
+          </Link>
+        </li>
+        <li className="wd-assignment-list-item">
+          <Link href={`/Courses/${cid}/Assignments/final`} className="wd-assignment-link">
+            Final
+          </Link>
+        </li>
+      </ul>
+
+      <h3 id="wd-assignments-project">
+        PROJECT 20% of Total <button>+</button>
+      </h3>
+      <ul id="wd-project-list">
+        <li className="wd-assignment-list-item">
+          <Link href={`/Courses/${cid}/Assignments/project`} className="wd-assignment-link">
+            Project
+          </Link>
+        </li>
+      </ul>
     </div>
   );
 }

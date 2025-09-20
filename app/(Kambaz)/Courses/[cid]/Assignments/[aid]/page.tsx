@@ -3,7 +3,7 @@ export default function AssignmentEditor({
 }: { params: { cid: string; aid: string } }) {
   const { aid } = params;
 
-  const assignmentName = `A${aid}`;
+  const assignmentName = `${aid}`;
   return (
     <div id="wd-assignments-editor">
       <label htmlFor="wd-name">Assignment Name</label>
