@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import "./styles.css";
 import KambazNavigation from "./Navigation";
-import Navigation from "./Navigation";
 export default function KambazLayout({ children }: Readonly<{ children: ReactNode }>) {
  return (
     <div id="wd-kambaz">
