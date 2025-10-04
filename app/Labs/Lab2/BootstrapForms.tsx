@@ -4,11 +4,10 @@ import FormSelect  from "react-bootstrap/esm/FormSelect";
 import FormCheck  from "react-bootstrap/esm/FormCheck";
 import FormRange from "react-bootstrap/esm/FormRange";
 import InputGroup from "react-bootstrap/esm/InputGroup";
-import InputGroupText from "react-bootstrap/esm/InputGroupText";
-import Row  from "react-bootstrap/esm/Row";
-import Col  from "react-bootstrap/esm/Col";
 import Form  from "react-bootstrap/esm/Form";
 import Button from "react-bootstrap/esm/Form";
+import InputGroupText from "react-bootstrap/esm/InputGroupText";
+import { Row, Col } from "react-bootstrap";
 
 export default function BootstrapForms() {
     return (
