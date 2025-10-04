@@ -1,13 +1,6 @@
+import { Button, Col, Form, FormCheck, FormControl, FormLabel, FormSelect, InputGroup, Row } from "react-bootstrap";
 import FormRange from "react-bootstrap/esm/FormRange";
 import InputGroupText from "react-bootstrap/esm/InputGroupText";
-import FormLabel from "react-bootstrap/esm/FormLabel";
-import FormControl  from "react-bootstrap/esm/FormControl";
-import FormSelect  from "react-bootstrap/esm/FormSelect";
-import FormCheck  from "react-bootstrap/esm/FormCheck";
-import InputGroup from "react-bootstrap/esm/InputGroup";
-import Form  from "react-bootstrap/esm/Form";
-import Button from "react-bootstrap/esm/Button";
-import { Row, Col } from "react-bootstrap";
 
 export default function BootstrapForms() {
     return (
