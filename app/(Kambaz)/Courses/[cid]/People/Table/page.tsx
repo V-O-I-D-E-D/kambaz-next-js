@@ -1,59 +1,79 @@
+"use client";
+
 import { Table } from "react-bootstrap";
 import { FaUserCircle } from "react-icons/fa";
+import { useParams } from "next/navigation";
+import {
+  users as usersData,
+  enrollments as enrollmentsData,
+} from "../../../../Database";
+
+// Derive types from the JSON modules (matches your actual data)
+type User = (typeof usersData)[number];
+type Enrollment = (typeof enrollmentsData)[number];
+
 export default function PeopleTable() {
- return (
-  <div id="wd-people-table">
-   <Table striped>
-    <thead>
-     <tr><th>Name</th><th>Login ID</th><th>Section</th><th>Role</th><th>Last Activity</th><th>Total Activity</th></tr>
-    </thead>
-    <tbody>
-     <tr><td className="wd-full-name text-nowrap">
-          <FaUserCircle className="me-2 fs-1 text-secondary" />
-          <span className="wd-first-name">Tony</span>{" "}
-          <span className="wd-last-name">Stark</span></td>
-      <td className="wd-login-id">001234561S</td>
-      <td className="wd-section">S101</td>
-      <td className="wd-role">STUDENT</td>
-      <td className="wd-last-activity">2020-10-01</td>
-      <td className="wd-total-activity">10:21:32</td></tr>
-          {/* Add at least 3 more users such as Bruce Wayne, Steve Rogers, and Natasha Romanoff */}
+  const { cid } = (useParams() as { cid?: string });
+
+  // Runtime guards for safety, types stay aligned with JSON
+  const allUsers: User[] = Array.isArray(usersData) ? usersData : [];
+  const allEnrollments: Enrollment[] = Array.isArray(enrollmentsData)
+    ? enrollmentsData
+    : [];
+
+  // Filter by course and join to user
+  const rows = allEnrollments
+    .filter((e) => !cid || e.course === cid)
+    .map((e) => {
+      const u = allUsers.find((u) => u._id === e.user);
+      return {
+        key: `${e.user}-${e.course}-${u?.section ?? ""}`,
+        firstName: u?.firstName ?? "Unknown",
+        lastName: u?.lastName ?? "",
+        loginId: u?.loginId ?? u?._id ?? "",
+        section: u?.section ?? "",
+        role: u?.role ?? "STUDENT", // role comes from users.json; default if missing
+        lastActivity: u?.lastActivity ?? "",
+        totalActivity: u?.totalActivity ?? "",
+      };
+    });
+
+  return (
+    <div id="wd-people-table">
+      <Table striped>
+        <thead>
           <tr>
-            <td className="wd-full-name text-nowrap">
-              <FaUserCircle className="me-2 fs-1 text-secondary" />
-              <span className="wd-first-name">SpongeBob</span>{" "}
-              <span className="wd-last-name">Squarepants</span>
-            </td>
-            <td className="wd-login-id">00234562S</td>
-            <td className="wd-section">S101</td>
-            <td className="wd-role">TA</td>
-            <td className="wd-last-activity">2021-10-02</td>
-            <td className="wd-total-activity">01:12:00</td>
+            <th>Name</th>
+            <th>Login ID</th>
+            <th>Section</th>
+            <th>Role</th>
+            <th>Last Activity</th>
+            <th>Total Activity</th>
           </tr>
-          <tr>
-            <td className="wd-full-name text-nowrap">
-              <FaUserCircle className="me-2 fs-1 text-secondary" />
-              <span className="wd-first-name">Patrick</span>{" "}
-              <span className="wd-last-name">Starfish</span>
-            </td>
-            <td className="wd-login-id">00345673S</td>
-            <td className="wd-section">S102</td>
-            <td className="wd-role">STUDENT</td>
-            <td className="wd-last-activity">2021-10-03</td>
-            <td className="wd-total-activity">07:46:11</td>
-          </tr>
-          <tr>
-            <td className="wd-full-name text-nowrap">
-              <FaUserCircle className="me-2 fs-1 text-secondary" />
-              <span className="wd-first-name">Eugene</span>{" "}
-              <span className="wd-last-name">Krabs</span>
-            </td>
-            <td className="wd-login-id">00456784S</td>
-            <td className="wd-section">S102</td>
-            <td className="wd-role">INSTRUCTOR</td>
-            <td className="wd-last-activity">2021-9-01</td>
-            <td className="wd-total-activity">12:00:00</td>
-          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.key}>
+              <td className="wd-full-name text-nowrap">
+                <FaUserCircle className="me-2 fs-1 text-secondary" />
+                <span className="wd-first-name">{r.firstName}</span>{" "}
+                <span className="wd-last-name">{r.lastName}</span>
+              </td>
+              <td className="wd-login-id">{r.loginId}</td>
+              <td className="wd-section">{r.section}</td>
+              <td className="wd-role">{r.role}</td>
+              <td className="wd-last-activity">{r.lastActivity}</td>
+              <td className="wd-total-activity">{r.totalActivity}</td>
+            </tr>
+          ))}
+
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={6} className="text-muted">
+                No people enrolled in this course.
+              </td>
+            </tr>
+          )}
         </tbody>
       </Table>
     </div>

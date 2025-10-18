@@ -1,10 +1,31 @@
 "use client";
-import { use } from "react";
-import Link from "next/link";
-import { FaRegFileAlt, FaSearch } from "react-icons/fa";
 
-export default function Assignments({ params }: { params: Promise<{ cid: string }> }) {
-  const { cid } = use(params);
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { FaRegFileAlt, FaSearch } from "react-icons/fa";
+import { assignments as assignmentsData } from "../../../Database";
+
+// ---- Types (no `any`) ----
+type Assignment = { _id: string; title: string; course: string };
+
+// ---- Type guard to safely narrow JSON ----
+function isAssignment(v: unknown): v is Assignment {
+  if (typeof v !== "object" || v === null) return false;
+  const o = v as Record<string, unknown>;
+  return (
+    typeof o._id === "string" &&
+    typeof o.title === "string" &&
+    typeof o.course === "string"
+  );
+}
+
+export default function Assignments() {
+  const { cid } = (useParams() as { cid?: string });
+
+  // Narrow imported JSON to Assignment[]
+  const raw: unknown = assignmentsData;
+  const all: Assignment[] = Array.isArray(raw) ? raw.filter(isAssignment) : [];
+  const courseAssignments = cid ? all.filter(a => a.course === cid) : [];
 
   return (
     <div id="wd-assignments">
@@ -46,15 +67,10 @@ export default function Assignments({ params }: { params: Promise<{ cid: string 
       </div>
 
       <ul id="wd-assignment-list" className="list-group rounded-0 mb-4">
-        {[
-          { slug: "0", title: "A0", meta: "Due Sep 5 at 11:59pm  |  100 pts" },
-          { slug: "1", title: "A1", meta: "Due Sep 12 at 11:59pm  |  100 pts" },
-          { slug: "2", title: "A2", meta: "Due Sep 19 at 11:59pm  |  100 pts" },
-          { slug: "3", title: "A3", meta: "Due Sep 26 at 11:59pm  |  100 pts" },
-          { slug: "4", title: "A4 ", meta: "Due Oct 3 at 11:59pm  |  100 pts" },
-        ].map((a) => (
+        {courseAssignments.map(a => (
           <li
-            key={a.slug}
+            key={a._id}
+            id={`wd-assignment-${a._id}`}  // ← optional but helpful for tests
             className="wd-assignment-list-item list-group-item d-flex align-items-start gap-3 rounded-0 border-0 border-start border-3 border-success"
           >
             <div className="text-secondary mt-1">
@@ -63,19 +79,25 @@ export default function Assignments({ params }: { params: Promise<{ cid: string 
             <div className="flex-grow-1">
               <div className="fw-semibold">
                 <Link
-                  href={`/Courses/${cid}/Assignments/${a.slug}`}
+                  id={`wd-assignment-${a._id}-link`}   // ← spec-friendly id
+                  href={`/Courses/${cid}/Assignments/${a._id}`}
                   className="wd-assignment-link text-decoration-none"
                 >
                   {a.title}
                 </Link>
               </div>
-              <div className="text-muted small">{a.meta}</div>
+              {/* No due dates in sample JSON; keep a simple meta line or omit */}
+              <div className="text-muted small">{/* e.g., "100 pts" */}</div>
             </div>
           </li>
         ))}
+
+        {courseAssignments.length === 0 && (
+          <li className="list-group-item rounded-0">No assignments for this course.</li>
+        )}
       </ul>
 
-      {/* ===== Quizzes group ===== */}
+      {/* ===== Quizzes group (kept as-is / static) ===== */}
       <div
         id="wd-assignments-quizzes"
         className="d-flex align-items-center justify-content-between bg-secondary text-white border px-3 py-2 rounded-1 mb-2"
@@ -111,7 +133,7 @@ export default function Assignments({ params }: { params: Promise<{ cid: string 
         ))}
       </ul>
 
-      {/* ===== Exams group ===== */}
+      {/* ===== Exams group (kept as-is / static) ===== */}
       <div
         id="wd-assignments-exams"
         className="d-flex align-items-center justify-content-between bg-secondary text-white border px-3 py-2 rounded-1 mb-2"
@@ -147,7 +169,7 @@ export default function Assignments({ params }: { params: Promise<{ cid: string 
         ))}
       </ul>
 
-      {/* ===== Project group ===== */}
+      {/* ===== Project group (kept as-is / static) ===== */}
       <div
         id="wd-assignments-project"
         className="d-flex align-items-center justify-content-between bg-secondary text-white border px-3 py-2 rounded-1 mb-2"
