@@ -1,3 +1,12 @@
+
+"use client";
+
+import { Provider } from "react-redux";
+
+import { useSelector } from "react-redux";
+
+import { ListGroup } from "react-bootstrap";
+
 import VariablesAndConstants from "./VariablesAndConstants";
 import VariableTypes from "./VariableTypes";
 import BooleanVariables from "./BooleanVariables";
@@ -30,15 +39,26 @@ import Square from "./Square";
 import Highlight from "./Highlight";
 import PathParameters from "./PathParameters";
 import AddPathParameters from "./add/[a]/[b]/page";
-import TodoItem from "./todos/TodoItem";
-import TodoList from "./todos/TodoList";
+import store, { RootState } from "../store";
 
-export default function Lab3() {
-  console.log('Hello World!');
-  return(
+export default function Lab3Page() {
+  return (
+    <Provider store={store}>
+      <Lab3 />
+    </Provider>
+  );
+}
+
+type Todo = { id: string; title: string };
+
+function Lab3() {
+  const todos = useSelector<RootState, Todo[]>((s) => s.todos.todos);
+
+  
+  return (
     <div id="wd-lab3">
       <h3>Lab 3</h3>
-      <VariablesAndConstants/>
+      <VariablesAndConstants />
       <VariableTypes />
       <BooleanVariables />
       <IfElse />
@@ -66,17 +86,23 @@ export default function Lab3() {
       <Classes />
       <Styles />
       <Add a={3} b={4} />
-            <h4>Square of 4</h4>
+      <h4>Square of 4</h4>
       <Square>4</Square>
       <hr />
       <Highlight>
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipitratione eaque illo minus cum, saepe totam
         vel nihil repellat nemo explicabo excepturi consectetur. Modi omnis minus sequi maiores, provident voluptates.
-     </Highlight>
-     <AddPathParameters params={{ a: '3', b: '4' }} />
-     <PathParameters />
-     <TodoItem />
-     <TodoList />
+      </Highlight>
+      <AddPathParameters params={{ a: "3", b: "4" }} />
+      <PathParameters />
+
+      <ListGroup className="my-3">
+        {todos.map((t) => (
+          <ListGroup.Item key={t.id}>{t.title}</ListGroup.Item>
+        ))}
+      </ListGroup>
+
+      <hr />
     </div>
   );
 }

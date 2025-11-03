@@ -2,20 +2,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ListGroup } from "react-bootstrap";
+import { useSelector } from "react-redux";
+import type { RootState } from "../Courses/[cid]/store";
 
 export default function AccountNavigation() {
-  const pathname = usePathname();
-  const links = [
-    { label: "Profile", href: "/Account/Profile", id: "wd-account-profile-link" },
-    { label: "Sign In", href: "/Account/Signin", id: "wd-account-signin-link" },
-    { label: "Sign Up", href: "/Account/Signup", id: "wd-account-signup-link" },
-  ];
+  const pathname = (usePathname() ?? "").toLowerCase();
+  const user = useSelector((s: RootState) => s.account.currentUser);
+
+  const links = user
+    ? [
+        { label: "Profile", href: "/Account/Profile", id: "wd-account-profile-link" },
+      ]
+    : [
+        { label: "Sign In", href: "/Account/Signin", id: "wd-account-signin-link" },
+        { label: "Sign Up", href: "/Account/Signup", id: "wd-account-signup-link" },
+      ];
 
   return (
     <div id="wd-account-navigation" style={{ width: 220 }}>
       <ListGroup className="rounded-0">
         {links.map((l) => {
-          const active = pathname?.startsWith(l.href);
+          const active = pathname.startsWith(l.href.toLowerCase());
           return (
             <Link
               key={l.href}

@@ -1,17 +1,18 @@
-// app/(Kambaz)/Account/page.tsx
 "use client";
+
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import type { RootState } from "../Courses/[cid]/store";
 
-export default function AccountPage() {
+export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const user = useSelector((s: RootState) => s.account.currentUser);
   const router = useRouter();
 
   useEffect(() => {
-    router.replace(user ? "/Account/Profile" : "/Account/Signin");
+    if (!user) router.replace("/Account/Signin");
   }, [user, router]);
 
-  return null;
+  if (!user) return null; // while redirecting
+  return <>{children}</>;
 }

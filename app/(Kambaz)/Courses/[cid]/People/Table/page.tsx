@@ -1,81 +1,45 @@
 "use client";
 
-import { Table } from "react-bootstrap";
-import { FaUserCircle } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
+import { users as usersDb } from "../../../../Database/index";
 import { useParams } from "next/navigation";
-import {
-  users as usersData,
-  enrollments as enrollmentsData,
-} from "../../../../Database";
-
-// Derive types from the JSON modules (matches your actual data)
-type User = (typeof usersData)[number];
-type Enrollment = (typeof enrollmentsData)[number];
 
 export default function PeopleTable() {
-  const { cid } = (useParams() as { cid?: string });
+  const { cid } = useParams<{ cid: string }>();
+  const currentUser = useSelector((s: RootState) => s.account.currentUser);
+  const enrollments = useSelector((s: RootState) =>
+    s.enrollments.enrollments.filter((e) => e.course === cid)
+  );
 
-  // Runtime guards for safety, types stay aligned with JSON
-  const allUsers: User[] = Array.isArray(usersData) ? usersData : [];
-  const allEnrollments: Enrollment[] = Array.isArray(enrollmentsData)
-    ? enrollmentsData
-    : [];
 
-  // Filter by course and join to user
-  const rows = allEnrollments
-    .filter((e) => !cid || e.course === cid)
-    .map((e) => {
-      const u = allUsers.find((u) => u._id === e.user);
-      return {
-        key: `${e.user}-${e.course}-${u?.section ?? ""}`,
-        firstName: u?.firstName ?? "Unknown",
-        lastName: u?.lastName ?? "",
-        loginId: u?.loginId ?? u?._id ?? "",
-        section: u?.section ?? "",
-        role: u?.role ?? "STUDENT", // role comes from users.json; default if missing
-        lastActivity: u?.lastActivity ?? "",
-        totalActivity: u?.totalActivity ?? "",
-      };
-    });
+  const rows = enrollments
+    .map((e) => usersDb.find((u) => u._id === e.user) || (currentUser && currentUser._id === e.user ? currentUser : null))
+    .filter(Boolean) as Array<(typeof usersDb)[number] | NonNullable<typeof currentUser>>;
 
   return (
-    <div id="wd-people-table">
-      <Table striped>
+    <div id="wd-people-table" className="table-responsive">
+      <table className="table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Login ID</th>
-            <th>Section</th>
-            <th>Role</th>
-            <th>Last Activity</th>
-            <th>Total Activity</th>
+            <th>NAME</th>
+            <th>ROLE</th>
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
-            <tr key={r.key}>
-              <td className="wd-full-name text-nowrap">
-                <FaUserCircle className="me-2 fs-1 text-secondary" />
-                <span className="wd-first-name">{r.firstName}</span>{" "}
-                <span className="wd-last-name">{r.lastName}</span>
-              </td>
-              <td className="wd-login-id">{r.loginId}</td>
-              <td className="wd-section">{r.section}</td>
-              <td className="wd-role">{r.role}</td>
-              <td className="wd-last-activity">{r.lastActivity}</td>
-              <td className="wd-total-activity">{r.totalActivity}</td>
+          {rows.map((u) => (
+            <tr key={u._id}>
+              <td>{u.firstName ?? ""} {u.lastName ?? ""} <div className="text-muted small">{u.username}</div></td>
+              <td>{(u.role ?? "").toString().toUpperCase()}</td>
             </tr>
           ))}
-
           {rows.length === 0 && (
             <tr>
-              <td colSpan={6} className="text-muted">
-                No people enrolled in this course.
-              </td>
+              <td colSpan={2} className="text-muted">No people enrolled.</td>
             </tr>
           )}
         </tbody>
-      </Table>
+      </table>
     </div>
   );
 }

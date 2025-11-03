@@ -1,26 +1,37 @@
 "use client";
-import Link from "next/link";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 import { FormControl } from "react-bootstrap";
+import { setCurrentUser } from "../reducer";
+import { users as usersDb } from "@/app/(Kambaz)/Database/index";
 
 export default function Signin() {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const [credentials, setCredentials] = useState({ username: "", password: "" });
+
+  const signin = () => {
+    const user = usersDb.find(
+      (u) => u.username === credentials.username && u.password === credentials.password
+    );
+    if (!user) return;
+    dispatch(setCurrentUser(user));
+    router.replace("/Account/Profile");
+  };
+
   return (
     <div id="wd-signin-screen" style={{ maxWidth: 420 }}>
       <h1 className="h3 mb-3">Sign in</h1>
-
-      <FormControl id="wd-username" placeholder="username" className="mb-2" />
-      <FormControl id="wd-password" placeholder="password" type="password" className="mb-2" />
-
-      <Link
-        id="wd-signin-btn"
-        href="/Account/Profile"
-        className="btn btn-primary w-100 mb-2"
-      >
+      <FormControl id="wd-username" placeholder="username" className="mb-2"
+        value={credentials.username}
+        onChange={(e) => setCredentials((c) => ({ ...c, username: e.target.value }))} />
+      <FormControl id="wd-password" placeholder="password" type="password" className="mb-3"
+        value={credentials.password}
+        onChange={(e) => setCredentials((c) => ({ ...c, password: e.target.value }))} />
+      <button id="wd-signin-btn" className="btn btn-primary w-100" onClick={signin}>
         Sign in
-      </Link>
-
-      <div className="d-flex justify-content-between">
-        <Link id="wd-signup-link" href="/Account/Signup">Sign up</Link>
-      </div>
+      </button>
     </div>
   );
 }
