@@ -1,15 +1,12 @@
 "use client";
-import HelloRedux from "./HelloRedux";
-import CounterRedux from "./CounterRedux";
-import AddRedux from "./AddRedux";
+import { Provider } from "react-redux";
+import store from "../../store";
+import ReduxExamples from "./index";
 
-export default function ReduxExamples() {
+export default function ReduxExamplesPage() {
   return (
-    <section id="wd-redux-examples">
-      <h2>Redux Examples</h2>
-      <HelloRedux />
-      <CounterRedux />
-      <AddRedux />
-    </section>
+    <Provider store={store}>
+      <ReduxExamples />
+    </Provider>
   );
 }
