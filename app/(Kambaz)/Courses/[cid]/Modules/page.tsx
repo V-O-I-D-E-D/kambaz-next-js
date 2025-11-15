@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../store";
-import { addModule, deleteModule, updateModule, type Module } from "../store/modulesSlice";
+import {
+  addModule,
+  deleteModule,
+  updateModule,
+  setModules,
+  type Module,
+} from "../store/modulesSlice";
 import { ListGroup, ListGroupItem } from "react-bootstrap";
 import ModulesControls from "./ModulesControls";
 import ModuleControlButtons from "./ModuleControlButtons";
@@ -11,12 +17,14 @@ import LessonControlButtons from "./LessonControlButtons";
 import { BsGripVertical } from "react-icons/bs";
 import { useParams } from "next/navigation";
 
+import * as coursesClient from "../../client";
+import * as modulesClient from "./client";
+
 export default function Modules() {
   const { cid } = useParams<{ cid: string }>();
   const dispatch = useDispatch<AppDispatch>();
 
-  const modules = useSelector((s: RootState) => s.modules.modules)
-    .filter((m) => m.course === cid);
+  const modules = useSelector((s: RootState) => s.modules.modules);
 
   const currentUser = useSelector((s: RootState) => s.account.currentUser);
   const isFaculty = (currentUser?.role ?? "").toUpperCase() === "FACULTY";
@@ -24,26 +32,58 @@ export default function Modules() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [nameDraft, setNameDraft] = useState("");
 
-  const handleAdd = () => dispatch(addModule({ name: "New Module", course: cid }));
+  useEffect(() => {
+    const fetchModules = async () => {
+      if (!cid) return;
+      const serverModules = await coursesClient.findModulesForCourse(
+        cid as string
+      );
+      dispatch(setModules(serverModules));
+    };
+
+    void fetchModules();
+  }, [cid, dispatch]);
+
+  const handleAdd = async () => {
+    if (!cid) return;
+    const newModule = await coursesClient.createModuleForCourse(
+      cid as string,
+      { name: "New Module", course: cid }
+    );
+    dispatch(addModule(newModule));
+  };
+
   const startEdit = (m: Module) => {
     setEditingId(m._id);
     setNameDraft(m.name);
   };
+
   const cancelEdit = () => {
     setEditingId(null);
     setNameDraft("");
   };
-  const commitUpdate = () => {
+
+  const commitUpdate = async () => {
     if (!editingId) return;
     const target = modules.find((m) => m._id === editingId);
     if (!target) return;
-    dispatch(updateModule({ ...target, name: nameDraft }));
+
+    const updated = await modulesClient.updateModule({
+      ...target,
+      name: nameDraft,
+    });
+
+    dispatch(updateModule(updated));
     cancelEdit();
+  };
+
+  const handleDelete = async (moduleId: string) => {
+    await modulesClient.deleteModule(moduleId);
+    dispatch(deleteModule(moduleId));
   };
 
   return (
     <div id="wd-modules">
-      {/* Add module — FACULTY only */}
       {isFaculty && <ModulesControls onAddModule={handleAdd} />}
       <hr />
 
@@ -69,14 +109,13 @@ export default function Modules() {
                   <span>{module.name}</span>
                 )}
 
-                {/* Edit/Delete/Update/Cancel — FACULTY only */}
                 {isFaculty && (
                   <ModuleControlButtons
                     editing={isEditing}
                     onEdit={() => startEdit(module)}
                     onUpdate={commitUpdate}
                     onCancel={cancelEdit}
-                    onDelete={() => dispatch(deleteModule(module._id))}
+                    onDelete={() => handleDelete(module._id)}
                   />
                 )}
               </div>
@@ -91,7 +130,6 @@ export default function Modules() {
                       <BsGripVertical className="me-2 fs-3" />
                       {lesson.name}
                     </span>
-                    {/* Lesson-level controls — FACULTY only */}
                     {isFaculty && <LessonControlButtons />}
                   </ListGroupItem>
                 ))}

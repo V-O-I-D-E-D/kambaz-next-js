@@ -7,6 +7,7 @@ import type { AppDispatch, RootState } from "../../store";
 import { updateAssignment, deleteAssignment } from "../../store/assignmentsSlice";
 import { Form, Row, Col, Card } from "react-bootstrap";
 import { useMemo, useState } from "react";
+import * as assignmentsClient from "../client"; // ⬅️ NEW: HTTP client
 
 function titleCase(s: string) {
   return s.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -51,16 +52,32 @@ export default function AssignmentEditor() {
     );
   }
 
-  const onSave = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const onSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (!aid || !cid) return;
-    dispatch(updateAssignment({ _id: aid, course: cid, title, points }));
+
+    // Persist to server
+    const updated = await assignmentsClient.updateAssignment({
+      _id: aid,
+      course: cid,
+      title,
+      points,
+      // group & submission are UI-only for now; add to type + backend if you want to persist them
+    });
+
+    // Keep Redux in sync
+    dispatch(updateAssignment(updated));
     router.push(`/Courses/${cid}/Assignments`);
   };
 
-  const onDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const onDelete = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (!aid) return;
+    if (!aid || !cid) return;
+
+    // Delete on server
+    await assignmentsClient.deleteAssignment(aid);
+
+    // Update Redux
     dispatch(deleteAssignment(aid));
     router.push(`/Courses/${cid}/Assignments`);
   };
@@ -77,7 +94,9 @@ export default function AssignmentEditor() {
                 <Form.Control
                   id="wd-assignment-name"
                   value={title}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setTitle(e.target.value)
+                  }
                 />
               </Form.Group>
 
@@ -118,7 +137,9 @@ export default function AssignmentEditor() {
                 <Form.Select
                   id="wd-assignment-group"
                   value={group}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setGroup(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setGroup(e.target.value)
+                  }
                 >
                   <option>ASSIGNMENTS</option>
                   <option>QUIZZES</option>

@@ -1,11 +1,17 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../store";
-import { addAssignment, deleteAssignment } from "../store/assignmentsSlice";
+import {
+  addAssignment,
+  deleteAssignment,
+  setAssignments,
+} from "../store/assignmentsSlice";
 import { ListGroup } from "react-bootstrap";
+import * as assignmentsClient from "./client";
 
 export default function AssignmentsPage() {
   const { cid } = useParams<{ cid: string }>();
@@ -15,17 +21,41 @@ export default function AssignmentsPage() {
   const user = useSelector((s: RootState) => s.account.currentUser);
   const isFaculty = (user?.role ?? "").toUpperCase() === "FACULTY";
 
-  const assignments = useSelector((s: RootState) =>
-    s.assignments.assignments.filter((a) => a.course === cid)
+  // After we switch to server-backed assignments, the slice already
+  // contains the assignments for this course, so we don't need to filter.
+  const assignments = useSelector(
+    (s: RootState) => s.assignments.assignments
   );
 
-  const handleAdd = () => {
-    const newId = `A${Date.now()}${Math.floor(Math.random() * 1_000_000)}`;
-    dispatch(addAssignment({ _id: newId, title: "New Assignment", course: cid }));
-    router.push(`/Courses/${cid}/Assignments/${newId}`);
+  // Load assignments for this course from the server
+  useEffect(() => {
+    const load = async () => {
+      if (!cid) return;
+      const data = await assignmentsClient.findAssignmentsForCourse(cid);
+      dispatch(setAssignments(data));
+    };
+    void load();
+  }, [cid, dispatch]);
+
+  const handleAdd = async () => {
+    if (!cid) return;
+
+    const newAssignment = await assignmentsClient.createAssignmentForCourse(
+      cid,
+      {
+        title: "New Assignment",
+        points: 100,
+        // simple default due date: today
+        dueDate: new Date().toISOString().slice(0, 10),
+      }
+    );
+
+    dispatch(addAssignment(newAssignment));
+    router.push(`/Courses/${cid}/Assignments/${newAssignment._id}`);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    await assignmentsClient.deleteAssignment(id);
     dispatch(deleteAssignment(id));
   };
 
@@ -34,7 +64,11 @@ export default function AssignmentsPage() {
       <div className="d-flex justify-content-between align-items-center">
         <h3 className="m-0">Assignments</h3>
         {isFaculty && (
-          <button id="wd-add-assignment-btn" className="btn btn-danger" onClick={handleAdd}>
+          <button
+            id="wd-add-assignment-btn"
+            className="btn btn-danger"
+            onClick={handleAdd}
+          >
             + Assignment
           </button>
         )}
@@ -60,7 +94,7 @@ export default function AssignmentsPage() {
                 className="btn btn-outline-danger btn-sm"
                 onClick={() => handleDelete(a._id)}
               >
-                Delete
+              Delete
               </button>
             )}
           </ListGroup.Item>
