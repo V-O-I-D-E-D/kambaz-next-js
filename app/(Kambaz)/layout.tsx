@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import "./styles.css";
 import KambazNavigation from "./Navigation";
 import Providers from "./Providers";
+import Session from "./Account/Session";
 
 export default function KambazLayout({ children }: { children: ReactNode }) {
   return (
@@ -11,7 +12,9 @@ export default function KambazLayout({ children }: { children: ReactNode }) {
           <KambazNavigation />
         </div>
         <div className="wd-main-content-offset p-3 flex-fill">
-          <Providers>{children}</Providers>
+          <Providers>
+            <Session>{children}</Session>
+          </Providers>
         </div>
       </div>
     </div>

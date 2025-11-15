@@ -21,6 +21,7 @@ export default function Labs() {
               <li><Link href="/Labs/Lab2">Lab 2</Link></li>
               <li><Link href="/Labs/Lab3">Lab 3</Link></li>
               <li><Link href="/Labs/Lab4">Lab 4</Link></li>
+              <li><Link href="/Labs/Lab5">Lab 5</Link></li>
             </ul>
           </li>
           <li>
@@ -62,6 +63,11 @@ export default function Labs() {
           <li>
             <Link href="/Labs/Lab4" id="wd-lab4-link">
               Lab 4: Maintaining State in React Applications
+            </Link>
+          </li>
+          <li>
+            <Link href="/Labs/Lab4" id="wd-lab4-link">
+              Lab 5: Implementing RESTful Web APIs with Express.js
             </Link>
           </li>
           <li>
