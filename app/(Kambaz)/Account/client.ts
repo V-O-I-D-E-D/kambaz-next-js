@@ -25,8 +25,8 @@ export const signin = async (
       credentials
     );
     return response.data;
-  } catch (e: any) {
-    if (e?.response?.status === 401) {
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e) && e.response?.status === 401) {
       return null;
     }
     throw e;
@@ -55,8 +55,8 @@ export const profile = async (): Promise<User | null> => {
       `${USERS_API}/profile`
     );
     return response.data;
-  } catch (e: any) {
-    if (e?.response?.status === 401) {
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e) && e.response?.status === 401) {
       return null;
     }
     throw e;
@@ -66,7 +66,6 @@ export const profile = async (): Promise<User | null> => {
 export const signout = async (): Promise<void> => {
   await axiosWithCredentials.post(`${USERS_API}/signout`);
 };
-
 
 export const findAllUsers = async (): Promise<User[]> => {
   const response = await axiosWithCredentials.get<User[]>(USERS_API);
@@ -79,8 +78,8 @@ export const findMyCourses = async (): Promise<Course[]> => {
       `${USERS_API}/current/courses`
     );
     return response.data;
-  } catch (e: any) {
-    if (e?.response?.status === 401) {
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e) && e.response?.status === 401) {
       return [];
     }
     throw e;
