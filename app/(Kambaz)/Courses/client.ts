@@ -6,28 +6,34 @@ import { HTTP_SERVER } from "../Account/client";
 const COURSES_API = `${HTTP_SERVER}/api/courses`;
 
 export const fetchAllCourses = async (): Promise<Course[]> => {
-  const { data } = await axios.get<Course[]>(COURSES_API);
+  const { data } = await axios.get<Course[]>(COURSES_API, {
+    withCredentials: true,
+  });
   return data;
 };
 
 export const deleteCourse = async (id: string): Promise<void> => {
-  await axios.delete(`${COURSES_API}/${id}`);
+  await axios.delete(`${COURSES_API}/${id}`, { withCredentials: true });
 };
 
-export const updateCourse = async (course: Course): Promise<Course> => {
+export const updateCourse = async (
+  courseId: string,
+  updates: Partial<Course>
+): Promise<Course> => {
   const { data } = await axios.put<Course>(
-    `${COURSES_API}/${course._id}`,
-    course
+    `${COURSES_API}/${courseId}`,
+    updates,
+    { withCredentials: true }
   );
   return data;
 };
-
 
 export const findModulesForCourse = async (
   courseId: string
 ): Promise<Module[]> => {
   const { data } = await axios.get<Module[]>(
-    `${COURSES_API}/${courseId}/modules`
+    `${COURSES_API}/${courseId}/modules`,
+    { withCredentials: true }
   );
   return data;
 };
@@ -38,7 +44,8 @@ export const createModuleForCourse = async (
 ): Promise<Module> => {
   const { data } = await axios.post<Module>(
     `${COURSES_API}/${courseId}/modules`,
-    module
+    module,
+    { withCredentials: true }
   );
   return data;
 };
