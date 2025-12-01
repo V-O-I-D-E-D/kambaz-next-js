@@ -3,9 +3,10 @@ import type { Module } from "../store/modulesSlice";
 import { HTTP_SERVER } from "../../../Account/client";
 
 const COURSES_API = `${HTTP_SERVER}/api/courses`;
-const MODULES_API = `${HTTP_SERVER}/api/modules`;
 
-export const findModulesForCourse = async (courseId: string): Promise<Module[]> => {
+export const findModulesForCourse = async (
+  courseId: string
+): Promise<Module[]> => {
   const { data } = await axios.get<Module[]>(
     `${COURSES_API}/${courseId}/modules`,
     { withCredentials: true }
@@ -25,17 +26,25 @@ export const createModuleForCourse = async (
   return data;
 };
 
-export const deleteModule = async (moduleId: string): Promise<void> => {
-  await axios.delete(`${MODULES_API}/${moduleId}`, {
+export const deleteModule = async (
+  courseId: string,
+  moduleId: string
+): Promise<void> => {
+  await axios.delete(`${COURSES_API}/${courseId}/modules/${moduleId}`, {
     withCredentials: true,
   });
 };
 
-export const updateModule = async (module: Module): Promise<Module> => {
+export const updateModule = async (
+  courseId: string,
+  module: Module
+): Promise<Module> => {
   const { data } = await axios.put<Module>(
-    `${MODULES_API}/${module._id}`,
+    `${COURSES_API}/${courseId}/modules/${module._id}`,
     module,
-    { withCredentials: true }
+    {
+      withCredentials: true,
+    }
   );
   return data;
 };

@@ -1,16 +1,19 @@
 import axios from "axios";
-import type { Enrollment } from "../store/enrollmentsSlice";
+import type { User } from "../../../Account/reducer";
 import { HTTP_SERVER } from "../../../Account/client";
 
 const COURSES_API = `${HTTP_SERVER}/api/courses`;
-const ENROLLMENTS_API = `${HTTP_SERVER}/api/enrollments`;
+const USERS_API = `${HTTP_SERVER}/api/users`;
 
-export const fetchEnrollmentsForCourse = async (
+const axiosWithCredentials = axios.create({
+  withCredentials: true,
+});
+
+export const fetchUsersForCourse = async (
   courseId: string
-): Promise<Enrollment[]> => {
-  const { data } = await axios.get<Enrollment[]>(
-    `${COURSES_API}/${courseId}/enrollments`,
-    { withCredentials: true }
+): Promise<User[]> => {
+  const { data } = await axiosWithCredentials.get<User[]>(
+    `${COURSES_API}/${courseId}/users`
   );
   return data;
 };
@@ -18,17 +21,19 @@ export const fetchEnrollmentsForCourse = async (
 export const enrollUserInCourse = async (
   userId: string,
   courseId: string
-): Promise<Enrollment> => {
-  const { data } = await axios.post<Enrollment>(
-    ENROLLMENTS_API,
-    { userId, courseId },
-    { withCredentials: true }
+) => {
+  const { data } = await axiosWithCredentials.post(
+    `${USERS_API}/${userId}/courses/${courseId}`
   );
   return data;
 };
 
-export const deleteEnrollment = async (enrollmentId: string): Promise<void> => {
-  await axios.delete(`${ENROLLMENTS_API}/${enrollmentId}`, {
-    withCredentials: true,
-  });
+export const unenrollUserFromCourse = async (
+  userId: string,
+  courseId: string
+) => {
+  const { data } = await axiosWithCredentials.delete(
+    `${USERS_API}/${userId}/courses/${courseId}`
+  );
+  return data;
 };

@@ -21,7 +21,11 @@ import {
   setCourses,
   type Course,
 } from "../Courses/[cid]/store/coursesSlice";
-import { enroll, unenroll } from "../Courses/[cid]/store/enrollmentsSlice";
+import {
+  enroll,
+  unenroll,
+  setEnrollments,
+} from "../Courses/[cid]/store/enrollmentsSlice";
 import * as accountClient from "../Account/client";
 import * as courseClient from "../Courses/client";
 
@@ -56,6 +60,28 @@ export default function Dashboard() {
     };
     void loadCourses();
   }, [dispatch]);
+
+  useEffect(() => {
+    const loadMyEnrollments = async () => {
+      if (!currentUser) {
+        dispatch(setEnrollments([]));
+        return;
+      }
+      try {
+        const myCourses = await accountClient.findMyCourses();
+        const enrollments = myCourses.map((course) => ({
+          _id: `${currentUser._id}-${course._id}`,
+          user: currentUser._id,
+          course: course._id,
+        }));
+        dispatch(setEnrollments(enrollments));
+      } catch (e) {
+        console.error("Failed to load enrollments", e);
+      }
+    };
+
+    void loadMyEnrollments();
+  }, [currentUser, dispatch]);
 
   const resetDraft = () =>
     setDraft({
@@ -154,14 +180,24 @@ export default function Dashboard() {
     "/images/cat6.jpg",
   ];
 
-  const onEnroll = (courseId: string) => {
+  const onEnroll = async (courseId: string) => {
     if (!currentUser) return;
-    dispatch(enroll({ userId: currentUser._id, courseId }));
+    try {
+      await courseClient.enrollIntoCourse(currentUser._id, courseId);
+      dispatch(enroll({ userId: currentUser._id, courseId }));
+    } catch (e) {
+      console.error("Failed to enroll", e);
+    }
   };
 
-  const onUnenroll = (courseId: string) => {
+  const onUnenroll = async (courseId: string) => {
     if (!currentUser) return;
-    dispatch(unenroll({ userId: currentUser._id, courseId }));
+    try {
+      await courseClient.unenrollFromCourse(currentUser._id, courseId);
+      dispatch(unenroll({ userId: currentUser._id, courseId }));
+    } catch (e) {
+      console.error("Failed to unenroll", e);
+    }
   };
 
   return (

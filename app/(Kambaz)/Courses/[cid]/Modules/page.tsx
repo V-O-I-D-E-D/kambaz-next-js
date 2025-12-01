@@ -68,7 +68,8 @@ export default function Modules() {
     const target = modules.find((m) => m._id === editingId);
     if (!target) return;
 
-    const updated = await modulesClient.updateModule({
+    if (!cid) return;
+    const updated = await modulesClient.updateModule(cid as string, {
       ...target,
       name: nameDraft,
     });
@@ -78,7 +79,8 @@ export default function Modules() {
   };
 
   const handleDelete = async (moduleId: string) => {
-    await modulesClient.deleteModule(moduleId);
+    if (!cid) return;
+    await modulesClient.deleteModule(cid as string, moduleId);
     dispatch(deleteModule(moduleId));
   };
 
