@@ -358,10 +358,10 @@ export default function Dashboard() {
           <h3 className="mt-4">Browse All Courses</h3>
           <hr />
           <Row xs={1} md={5} className="g-4">
-        {coursesWithImage.map((course) => {
-          const isEnrolled = enrolledCourseIds.has(course._id);
-          const fallback =
-            course.image ?? course.fallbackImage ?? fallbacks[0];
+            {coursesWithImage.map((course) => {
+              const isEnrolled = enrolledCourseIds.has(course._id);
+              const fallback =
+                course.image ?? course.fallbackImage ?? fallbacks[0];
               return (
                 <Col key={course._id} style={{ width: "300px" }}>
                   <Card>
