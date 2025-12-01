@@ -349,7 +349,8 @@ export default function Dashboard() {
               </Link>
             </Card>
           </Col>
-        ))}
+        );
+      })}
       </Row>
 
       {currentUser && (
