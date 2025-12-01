@@ -37,6 +37,14 @@ export default function Dashboard() {
 
   const courses = useSelector((s: RootState) => s.courses.courses);
   const enrollments = useSelector((s: RootState) => s.enrollments.enrollments);
+  const coursesWithImage = useMemo(
+    () =>
+      courses.map((course, index) => ({
+        ...course,
+        fallbackImage: fallbacks[index % fallbacks.length],
+      })),
+    [courses]
+  );
 
   // Form draft
   const [draft, setDraft] = useState({
@@ -166,7 +174,7 @@ export default function Dashboard() {
     );
   }, [enrollments, currentUser]);
 
-  const myCourses: Course[] = courses.filter((c) =>
+  const myCourses: Course[] = coursesWithImage.filter((c) =>
     enrolledCourseIds.has(c._id)
   );
 
@@ -269,24 +277,28 @@ export default function Dashboard() {
       </h2>
       <hr />
       <Row xs={1} md={5} className="g-4 mb-4">
-        {myCourses.map((course, i) => (
-          <Col
-            key={course._id}
-            className="wd-dashboard-course"
-            style={{ width: "300px" }}
-          >
-            <Card>
-              <Link
-                href={`/Courses/${course._id}`}
-                className="wd-dashboard-course-link text-decoration-none text-dark"
-              >
-                <CardImg
-                  variant="top"
-                  src={course.image ?? fallbacks[i % fallbacks.length]}
-                  width={200}
-                  height={150}
-                  alt="Course"
-                />
+        {myCourses.map((course) => {
+          const fallback =
+            course.image ?? course.fallbackImage ?? fallbacks[0];
+
+          return (
+            <Col
+              key={course._id}
+              className="wd-dashboard-course"
+              style={{ width: "300px" }}
+            >
+              <Card>
+                <Link
+                  href={`/Courses/${course._id}`}
+                  className="wd-dashboard-course-link text-decoration-none text-dark"
+                >
+                  <CardImg
+                    variant="top"
+                    src={fallback}
+                    width={200}
+                    height={150}
+                    alt="Course"
+                  />
                 <CardBody>
                   <CardTitle className="wd-dashboard-course-title text-nowrap overflow-hidden">
                     {course.number} {course.name}
@@ -346,14 +358,16 @@ export default function Dashboard() {
           <h3 className="mt-4">Browse All Courses</h3>
           <hr />
           <Row xs={1} md={5} className="g-4">
-            {courses.map((course, i) => {
-              const isEnrolled = enrolledCourseIds.has(course._id);
+        {coursesWithImage.map((course) => {
+          const isEnrolled = enrolledCourseIds.has(course._id);
+          const fallback =
+            course.image ?? course.fallbackImage ?? fallbacks[0];
               return (
                 <Col key={course._id} style={{ width: "300px" }}>
                   <Card>
                     <CardImg
                       variant="top"
-                      src={course.image ?? fallbacks[i % fallbacks.length]}
+                      src={fallback}
                       width={200}
                       height={150}
                       alt="Course"
