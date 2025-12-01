@@ -29,6 +29,18 @@ import {
 import * as accountClient from "../Account/client";
 import * as courseClient from "../Courses/client";
 
+type CourseWithFallback = Course & { fallbackImage: string };
+
+const FALLBACK_IMAGES = [
+  "/images/cat7.jpg",
+  "/images/cat1.jpg",
+  "/images/cat2.jpg",
+  "/images/cat3.jpg",
+  "/images/cat4.jpg",
+  "/images/cat5.jpg",
+  "/images/cat6.jpg",
+];
+
 export default function Dashboard() {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -37,20 +49,11 @@ export default function Dashboard() {
 
   const courses = useSelector((s: RootState) => s.courses.courses);
   const enrollments = useSelector((s: RootState) => s.enrollments.enrollments);
-  const fallbacks = [
-    "/images/cat7.jpg",
-    "/images/cat1.jpg",
-    "/images/cat2.jpg",
-    "/images/cat3.jpg",
-    "/images/cat4.jpg",
-    "/images/cat5.jpg",
-    "/images/cat6.jpg",
-  ];
-  const coursesWithImage = useMemo(
+  const coursesWithImage: CourseWithFallback[] = useMemo(
     () =>
       courses.map((course, index) => ({
         ...course,
-        fallbackImage: fallbacks[index % fallbacks.length],
+        fallbackImage: FALLBACK_IMAGES[index % FALLBACK_IMAGES.length],
       })),
     [courses]
   );
@@ -183,7 +186,7 @@ export default function Dashboard() {
     );
   }, [enrollments, currentUser]);
 
-  const myCourses: Course[] = coursesWithImage.filter((c) =>
+  const myCourses: CourseWithFallback[] = coursesWithImage.filter((c) =>
     enrolledCourseIds.has(c._id)
   );
 
@@ -278,7 +281,7 @@ export default function Dashboard() {
       <Row xs={1} md={5} className="g-4 mb-4">
         {myCourses.map((course) => {
           const fallback =
-            course.image ?? course.fallbackImage ?? fallbacks[0];
+            course.image ?? course.fallbackImage ?? FALLBACK_IMAGES[0];
 
           return (
             <Col
@@ -361,7 +364,7 @@ export default function Dashboard() {
             {coursesWithImage.map((course) => {
               const isEnrolled = enrolledCourseIds.has(course._id);
               const fallback =
-                course.image ?? course.fallbackImage ?? fallbacks[0];
+                course.image ?? course.fallbackImage ?? FALLBACK_IMAGES[0];
               return (
                 <Col key={course._id} style={{ width: "300px" }}>
                   <Card>
