@@ -37,6 +37,15 @@ export default function Dashboard() {
 
   const courses = useSelector((s: RootState) => s.courses.courses);
   const enrollments = useSelector((s: RootState) => s.enrollments.enrollments);
+  const fallbacks = [
+    "/images/cat7.jpg",
+    "/images/cat1.jpg",
+    "/images/cat2.jpg",
+    "/images/cat3.jpg",
+    "/images/cat4.jpg",
+    "/images/cat5.jpg",
+    "/images/cat6.jpg",
+  ];
   const coursesWithImage = useMemo(
     () =>
       courses.map((course, index) => ({
@@ -177,16 +186,6 @@ export default function Dashboard() {
   const myCourses: Course[] = coursesWithImage.filter((c) =>
     enrolledCourseIds.has(c._id)
   );
-
-  const fallbacks = [
-    "/images/cat7.jpg",
-    "/images/cat1.jpg",
-    "/images/cat2.jpg",
-    "/images/cat3.jpg",
-    "/images/cat4.jpg",
-    "/images/cat5.jpg",
-    "/images/cat6.jpg",
-  ];
 
   const onEnroll = async (courseId: string) => {
     if (!currentUser) return;
