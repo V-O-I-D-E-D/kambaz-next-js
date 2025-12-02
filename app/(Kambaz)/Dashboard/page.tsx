@@ -324,27 +324,26 @@ export default function Dashboard() {
                   <div className="d-flex gap-2">
                     <Button variant="primary">Go</Button>
                     {isFaculty && (
-                      <>
-                        <Button
-                          variant="outline-secondary"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleEdit(course);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline-danger"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            void handleDelete(course._id);
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </>
+                      <Button
+                        variant="outline-secondary"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleEdit(course);
+                        }}
+                      >
+                        Edit
+                      </Button>
                     )}
+                    <Button
+                      id="wd-delete-course-click"
+                      variant="outline-danger"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        void handleDelete(course._id);
+                      }}
+                    >
+                      Delete
+                    </Button>
                     {currentUser && (
                       <Button
                         id="wd-unenroll-course"
