@@ -25,6 +25,28 @@ import { enroll, unenroll } from "../Courses/[cid]/store/enrollmentsSlice";
 import * as accountClient from "../Account/client";
 import * as courseClient from "../Courses/client";
 
+type CourseWithFallback = Course & { fallbackImage: string };
+
+const FALLBACK_IMAGES = [
+  "/images/cat7.jpg",
+  "/images/cat1.jpg",
+  "/images/cat2.jpg",
+  "/images/cat3.jpg",
+  "/images/cat4.jpg",
+  "/images/cat5.jpg",
+  "/images/cat6.jpg",
+];
+
+const pickFallbackImage = (courseId: string, index: number) => {
+  const hash = courseId
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  if (Number.isFinite(hash)) {
+    return FALLBACK_IMAGES[hash % FALLBACK_IMAGES.length];
+  }
+  return FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+};
+
 export default function Dashboard() {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -33,6 +55,14 @@ export default function Dashboard() {
 
   const courses = useSelector((s: RootState) => s.courses.courses);
   const enrollments = useSelector((s: RootState) => s.enrollments.enrollments);
+  const coursesWithImage: CourseWithFallback[] = useMemo(
+    () =>
+      courses.map((course, index) => ({
+        ...course,
+        fallbackImage: pickFallbackImage(course._id, index),
+      })),
+    [courses]
+  );
 
   // Form draft
   const [draft, setDraft] = useState({
@@ -140,19 +170,9 @@ export default function Dashboard() {
     );
   }, [enrollments, currentUser]);
 
-  const myCourses: Course[] = courses.filter((c) =>
+  const myCourses: CourseWithFallback[] = coursesWithImage.filter((c) =>
     enrolledCourseIds.has(c._id)
   );
-
-  const fallbacks = [
-    "/images/cat7.jpg",
-    "/images/cat1.jpg",
-    "/images/cat2.jpg",
-    "/images/cat3.jpg",
-    "/images/cat4.jpg",
-    "/images/cat5.jpg",
-    "/images/cat6.jpg",
-  ];
 
   const onEnroll = (courseId: string) => {
     if (!currentUser) return;
@@ -233,75 +253,80 @@ export default function Dashboard() {
       </h2>
       <hr />
       <Row xs={1} md={5} className="g-4 mb-4">
-        {myCourses.map((course, i) => (
-          <Col
-            key={course._id}
-            className="wd-dashboard-course"
-            style={{ width: "300px" }}
-          >
-            <Card>
-              <Link
-                href={`/Courses/${course._id}`}
-                className="wd-dashboard-course-link text-decoration-none text-dark"
-              >
-                <CardImg
-                  variant="top"
-                  src={course.image ?? fallbacks[i % fallbacks.length]}
-                  width={200}
-                  height={150}
-                  alt="Course"
-                />
-                <CardBody>
-                  <CardTitle className="wd-dashboard-course-title text-nowrap overflow-hidden">
-                    {course.number} {course.name}
-                  </CardTitle>
-                  <CardText
-                    className="wd-dashboard-course-description overflow-hidden"
-                    style={{ height: "100px" }}
-                  >
-                    {course.description}
-                  </CardText>
-                  <div className="d-flex gap-2">
-                    <Button variant="primary">Go</Button>
-                    {isFaculty && (
-                      <Button
-                        variant="outline-secondary"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleEdit(course);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                    )}
-                    <Button
-                      id="wd-delete-course-click"
-                      variant="outline-danger"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        void handleDelete(course._id);
-                      }}
+        {myCourses.map((course) => {
+          const fallback =
+            course.image ?? course.fallbackImage ?? FALLBACK_IMAGES[0];
+
+          return (
+            <Col
+              key={course._id}
+              className="wd-dashboard-course"
+              style={{ width: "300px" }}
+            >
+              <Card>
+                <Link
+                  href={`/Courses/${course._id}`}
+                  className="wd-dashboard-course-link text-decoration-none text-dark"
+                >
+                  <CardImg
+                    variant="top"
+                    src={fallback}
+                    width={200}
+                    height={150}
+                    alt="Course"
+                  />
+                  <CardBody>
+                    <CardTitle className="wd-dashboard-course-title text-nowrap overflow-hidden">
+                      {course.number} {course.name}
+                    </CardTitle>
+                    <CardText
+                      className="wd-dashboard-course-description overflow-hidden"
+                      style={{ height: "100px" }}
                     >
-                      Delete
-                    </Button>
-                    {currentUser && (
+                      {course.description}
+                    </CardText>
+                    <div className="d-flex gap-2">
+                      <Button variant="primary">Go</Button>
+                      {isFaculty && (
+                        <Button
+                          variant="outline-secondary"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleEdit(course);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      )}
                       <Button
-                        id="wd-unenroll-course"
-                        variant="outline-secondary"
+                        id="wd-delete-course-click"
+                        variant="outline-danger"
                         onClick={(e) => {
                           e.preventDefault();
-                          onUnenroll(course._id);
+                          void handleDelete(course._id);
                         }}
                       >
-                        Unenroll
+                        Delete
                       </Button>
-                    )}
-                  </div>
-                </CardBody>
-              </Link>
-            </Card>
-          </Col>
-        ))}
+                      {currentUser && (
+                        <Button
+                          id="wd-unenroll-course"
+                          variant="outline-secondary"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onUnenroll(course._id);
+                          }}
+                        >
+                          Unenroll
+                        </Button>
+                      )}
+                    </div>
+                  </CardBody>
+                </Link>
+              </Card>
+            </Col>
+          );
+        })}
       </Row>
 
       {currentUser && (
@@ -309,14 +334,16 @@ export default function Dashboard() {
           <h3 className="mt-4">Browse All Courses</h3>
           <hr />
           <Row xs={1} md={5} className="g-4">
-            {courses.map((course, i) => {
+            {coursesWithImage.map((course) => {
               const isEnrolled = enrolledCourseIds.has(course._id);
+              const fallback =
+                course.image ?? course.fallbackImage ?? FALLBACK_IMAGES[0];
               return (
                 <Col key={course._id} style={{ width: "300px" }}>
                   <Card>
                     <CardImg
                       variant="top"
-                      src={course.image ?? fallbacks[i % fallbacks.length]}
+                      src={fallback}
                       width={200}
                       height={150}
                       alt="Course"
