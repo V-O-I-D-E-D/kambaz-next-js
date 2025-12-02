@@ -14,6 +14,7 @@ import {
   Row,
   Form,
 } from "react-bootstrap";
+import axios from "axios";
 import { useMemo, useState, useEffect } from "react";
 import {
   addCourse,
@@ -22,6 +23,7 @@ import {
   type Course,
 } from "../Courses/[cid]/store/coursesSlice";
 import { enroll, unenroll } from "../Courses/[cid]/store/enrollmentsSlice";
+import { setCurrentUser } from "../Account/reducer";
 import * as accountClient from "../Account/client";
 import * as courseClient from "../Courses/client";
 
@@ -87,6 +89,13 @@ export default function Dashboard() {
     void loadCourses();
   }, [dispatch]);
 
+  const isUnauthorizedError = (error: unknown) =>
+    axios.isAxiosError(error) && error.response?.status === 401;
+
+  const handleUnauthorized = () => {
+    dispatch(setCurrentUser(null));
+  };
+
   const resetDraft = () =>
     setDraft({
       number: "CS0000",
@@ -111,6 +120,10 @@ export default function Dashboard() {
       dispatch(enroll({ userId: currentUser._id, courseId: newCourse._id }));
       resetDraft();
     } catch (e) {
+      if (isUnauthorizedError(e)) {
+        handleUnauthorized();
+        return;
+      }
       console.error("Failed to create course", e);
     }
   };
@@ -148,6 +161,10 @@ export default function Dashboard() {
       setEditingCourseId(null);
       resetDraft();
     } catch (e) {
+      if (isUnauthorizedError(e)) {
+        handleUnauthorized();
+        return;
+      }
       console.error("Failed to update course", e);
     }
   };
@@ -157,6 +174,10 @@ export default function Dashboard() {
       await courseClient.deleteCourse(id);
       dispatch(deleteCourse(id));
     } catch (e) {
+      if (isUnauthorizedError(e)) {
+        handleUnauthorized();
+        return;
+      }
       console.error("Failed to delete course", e);
     }
   };
@@ -174,14 +195,32 @@ export default function Dashboard() {
     enrolledCourseIds.has(c._id)
   );
 
-  const onEnroll = (courseId: string) => {
+  const onEnroll = async (courseId: string) => {
     if (!currentUser) return;
-    dispatch(enroll({ userId: currentUser._id, courseId }));
+    try {
+      await courseClient.enrollIntoCourse(currentUser._id, courseId);
+      dispatch(enroll({ userId: currentUser._id, courseId }));
+    } catch (e) {
+      if (isUnauthorizedError(e)) {
+        handleUnauthorized();
+        return;
+      }
+      console.error("Failed to enroll", e);
+    }
   };
 
-  const onUnenroll = (courseId: string) => {
+  const onUnenroll = async (courseId: string) => {
     if (!currentUser) return;
-    dispatch(unenroll({ userId: currentUser._id, courseId }));
+    try {
+      await courseClient.unenrollFromCourse(currentUser._id, courseId);
+      dispatch(unenroll({ userId: currentUser._id, courseId }));
+    } catch (e) {
+      if (isUnauthorizedError(e)) {
+        handleUnauthorized();
+        return;
+      }
+      console.error("Failed to unenroll", e);
+    }
   };
 
   return (

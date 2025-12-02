@@ -12,11 +12,10 @@ export default function Session({ children }: { children: ReactNode }) {
   const fetchProfile = async () => {
     try {
       const currentUser = await client.profile();
-      if (currentUser) {
-        dispatch(setCurrentUser(currentUser));
-      }
+      dispatch(setCurrentUser(currentUser));
     } catch (err: unknown) {
       console.error(err);
+      dispatch(setCurrentUser(null));
     }
     setPending(false);
   };
