@@ -346,6 +346,13 @@ export default function Dashboard() {
                             Edit
                           </Button>
                         )}
+                        <Button
+                          id="wd-delete-course-click"
+                          variant="outline-danger"
+                          onClick={() => void handleDelete(course._id)}
+                        >
+                          Delete
+                        </Button>
                         {isEnrolled ? (
                           <Button
                             id="wd-unenroll-course"
