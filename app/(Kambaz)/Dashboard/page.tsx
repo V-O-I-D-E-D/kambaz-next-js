@@ -112,6 +112,7 @@ export default function Dashboard() {
       name: draft.name || "New Course",
       description: draft.description || "Describe this course…",
       image: draft.image || undefined,
+      ownerId: currentUser._id,
     };
 
     try {

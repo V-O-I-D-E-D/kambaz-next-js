@@ -87,7 +87,7 @@ export const findMyCourses = async (): Promise<Course[]> => {
 };
 
 export const createCourse = async (
-  course: Omit<Course, "_id">
+  course: Omit<Course, "_id"> & { ownerId?: string }
 ): Promise<Course> => {
   const response = await axiosWithCredentials.post<Course>(
     `${USERS_API}/current/courses`,
