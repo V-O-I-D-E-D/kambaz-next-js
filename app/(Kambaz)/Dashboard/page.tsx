@@ -41,6 +41,16 @@ const FALLBACK_IMAGES = [
   "/images/cat6.jpg",
 ];
 
+const pickFallbackImage = (courseId: string, index: number) => {
+  const hash = courseId
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  if (Number.isFinite(hash)) {
+    return FALLBACK_IMAGES[hash % FALLBACK_IMAGES.length];
+  }
+  return FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+};
+
 export default function Dashboard() {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -53,7 +63,7 @@ export default function Dashboard() {
     () =>
       courses.map((course, index) => ({
         ...course,
-        fallbackImage: FALLBACK_IMAGES[index % FALLBACK_IMAGES.length],
+        fallbackImage: pickFallbackImage(course._id, index),
       })),
     [courses]
   );
